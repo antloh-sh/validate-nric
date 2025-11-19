@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Singapore NRIC/FIN Validator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container-form {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .btn-validate {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        .btn-validate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .btn-validate:active {
+            transform: translateY(0);
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            font-weight: 600;
+        }
+        .result.hidden {
+            display: none;
+        }
+        .result.valid {
+            background-color: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+            display: block;
+        }
+        .result.invalid {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+            display: block;
+        }
+        .info-box {
+            background-color: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #333;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-form">
+        <div class="header">
+            <h1>🂫 NRIC/FIN</h1>
+            <p>Singapore National ID Validator</p>
+        </div>
+
+        <div class="form-group">
+            <label for="nricInput">Enter NRIC or FIN:</label>
+            <input 
+                type="text" 
+                id="nricInput" 
+                placeholder="e.g., S1234567A" 
+                class="form-control"
+                autocomplete="off"
+                maxlength="9"
+            >
+        </div>
+
+        <button class="btn-validate" onclick="validateNRIC()">Validate</button>
+
+        <div id="result" class="result hidden"></div>
+
+        <div class="info-box">
+            <strong>Valid Format:</strong><br>
+            Prefix (S/T/F/G) + 7 digits + 1 letter (A-Z)<br>
+            <strong>Example:</strong> S1234567A
+        </div>
+    </div>
+
+    <script>
+        // NRIC/FIN validation logic
+        function performNricValidation(nric) {
+            // Convert to uppercase for case-insensitive validation
+            nric = nric.toUpperCase();
+
+            // Regex to validate format: 1st char (S,T,F,G), next 7 digits, last char (A-Z)
+            const nricRegex = /^[STFG]\d{7}[A-Z]$/;
+            if (!nricRegex.test(nric)) {
+                return { 
+                    isValid: false, 
+                    message: 'Invalid format. Please use S/T/F/G followed by 7 digits and 1 letter (e.g., S1234567A).' 
+                };
+            }
+
+            // Extract components
+            const firstChar = nric.charAt(0);
+            const digits = nric.substring(1, 8);
+            const lastChar = nric.charAt(8);
+
+            // Weights for calculation
+            const weights = [2, 7, 6, 5, 4, 3, 2];
+            let sum = 0;
+
+            // Apply weights and sum
+            for (let i = 0; i < 7; i++) {
+                sum += parseInt(digits.charAt(i)) * weights[i];
+            }
+
+            // Add offset for 'T' or 'G' prefixes
+            if (firstChar === 'T' || firstChar === 'G') {
+                sum += 4;
+            }
+
+            // Calculate remainder
+            const remainder = sum % 11;
+
+            // Determine expected checksum
+            const nricChecksumTable = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'Z', 'J'];
+            const finChecksumTable = ['X', 'W', 'U', 'T', 'R', 'P', 'N', 'M', 'L', 'K', 'J'];
+
+            let expectedChecksum;
+            if (firstChar === 'S' || firstChar === 'T') {
+                expectedChecksum = nricChecksumTable[remainder];
+            } else {
+                expectedChecksum = finChecksumTable[remainder];
+            }
+
+            // Validate checksum
+            if (lastChar === expectedChecksum) {
+                return { 
+                    isValid: true, 
+                    message: 'Valid NRIC/FIN number ✓' 
+                };
+            } else {
+                return { 
+                    isValid: false, 
+                    message: `Invalid checksum. Expected: ${expectedChecksum}, Got: ${lastChar}` 
+                };
+            }
+        }
+
+        function validateNRIC() {
+            const input = document.getElementById('nricInput').value.trim();
+            const resultDiv = document.getElementById('result');
+
+            if (!input) {
+                resultDiv.textContent = 'Please enter a NRIC or FIN number';
+                resultDiv.className = 'result invalid';
+                return;
+            }
+
+            const result = performNricValidation(input);
+            
+            if (result.isValid) {
+                resultDiv.textContent = result.message;
+                resultDiv.className = 'result valid';
+            } else {
+                resultDiv.textContent = result.message;
+                resultDiv.className = 'result invalid';
+            }
+        }
+
+        // Allow Enter key to trigger validation
+        document.getElementById('nricInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                validateNRIC();
+            }
+        });
+
+        // Focus on input when page loads
+        window.addEventListener('load', function() {
+            document.getElementById('nricInput').focus();
+        });
+    </script>
+</body>
+</html>
