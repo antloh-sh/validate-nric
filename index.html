@@ -140,7 +140,7 @@
 
         <div class="info-box">
             <strong>Valid Format:</strong><br>
-            Prefix (S/T/F/G) + 7 digits + 1 letter (A-Z)<br>
+            Prefix (S/T/F/G/M) + 7 digits + 1 letter (A-Z)<br>
             <strong>Example:</strong> S1234567A
         </div>
     </div>
@@ -152,7 +152,7 @@
             nric = nric.toUpperCase();
 
             // Regex to validate format: 1st char (S,T,F,G), next 7 digits, last char (A-Z)
-            const nricRegex = /^[STFG]\d{7}[A-Z]$/;
+            const nricRegex = /^[STFGM]\d{7}[A-Z]$/;
             if (!nricRegex.test(nric)) {
                 return { 
                     isValid: false, 
@@ -174,10 +174,12 @@
                 sum += parseInt(digits.charAt(i)) * weights[i];
             }
 
-            // Add offset for 'T' or 'G' prefixes
-            if (firstChar === 'T' || firstChar === 'G') {
-                sum += 4;
-            }
+            // Add offset for 'T', 'G', or 'M' prefixes
+if (firstChar === 'T' || firstChar === 'G') {
+sum += 4;
+} else if (firstChar === 'M') {
+sum += 3;
+}
 
             // Calculate remainder
             const remainder = sum % 11;
@@ -185,12 +187,14 @@
 
             // Determine expected checksum
             const nricChecksumTable = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'Z', 'J'];
-            const finChecksumTable = ['X', 'W', 'U', 'T', 'R', 'P', 'N', 'M', 'L', 'K', 'J'];
-
+const finChecksumTable = ['K', 'L', 'J', 'N', 'P', 'Q', 'R', 'T', 'U', 'W', 'X'];
             let expectedChecksum;
             if (firstChar === 'S' || firstChar === 'T') {
-                expectedChecksum = nricChecksumTable[checksumIndex];
-            } else {
+expectedChecksum = nricChecksumTable[checksumIndex];
+} else {
+// For F, G, or M prefixes
+expectedChecksum = finChecksumTable[checksumIndex];
+}se {
                 expectedChecksum = finChecksumTable[checksumIndex];
             }
 
