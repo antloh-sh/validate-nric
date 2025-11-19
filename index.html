@@ -181,6 +181,7 @@
 
             // Calculate remainder
             const remainder = sum % 11;
+                        const checksumIndex = 11 - (remainder + 1);
 
             // Determine expected checksum
             const nricChecksumTable = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'Z', 'J'];
@@ -188,9 +189,9 @@
 
             let expectedChecksum;
             if (firstChar === 'S' || firstChar === 'T') {
-                expectedChecksum = nricChecksumTable[remainder];
+                expectedChecksum = nricChecksumTable[checksumIndex];
             } else {
-                expectedChecksum = finChecksumTable[remainder];
+                expectedChecksum = finChecksumTable[checksumIndex];
             }
 
             // Validate checksum
