@@ -194,10 +194,7 @@ expectedChecksum = nricChecksumTable[checksumIndex];
 } else {
 // For F, G, or M prefixes
 expectedChecksum = finChecksumTable[checksumIndex];
-}se {
-                expectedChecksum = finChecksumTable[checksumIndex];
-            }
-
+}
             // Validate checksum
             if (lastChar === expectedChecksum) {
                 return { 
